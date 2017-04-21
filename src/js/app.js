@@ -1,15 +1,51 @@
+// Grab Displays
+const timeBox = document.querySelector('.time-box');
+const timeCircle = document.querySelector('circle.progress');
 const timeDisplay = document.querySelector('.center-time');
-const roundsElement = document.querySelector('.rounds');
+const roundsCounter = document.querySelector('.rounds');
+const progressBar = document.querySelector('.progress-bar');
+
+
+// Grab Controls
 const startButton = document.querySelector('button#start');
 const pauseButton = document.querySelector('button#pause');
 const resetButton = document.querySelector('button#reset');
-const progressBar = document.querySelector('.progress-bar');
-const timeCircle = document.querySelector('.time-circle');
 
 startButton.onclick = startTimer;
 pauseButton.onclick = pauseTimer;
 resetButton.onclick = resetTimer;
 
+
+// Timer actions
+function startTimer() {
+    if (!timerIsRunning) {
+        intervalId = setInterval(timer, 1000);
+        timerIsRunning = true;
+        startButton.classList.add('hide');
+        pauseButton.classList.remove('hide');
+    }
+}
+
+function pauseTimer() {
+    timerIsRunning = false;
+    clearInterval(intervalId);
+    pauseButton.classList.add('hide');
+    startButton.classList.remove('hide');
+}
+
+function resetTimer() {
+    pauseTimer();
+    timeDisplay.textContent = timerConfig.prepTime;
+    runningValues = Object.assign({}, timerConfig);
+    roundsCounter.textContent = `${runningValues.rounds}/${timerConfig.rounds}`;
+    timeBox.classList.remove('work');
+    timeBox.classList.remove('rest');
+    timeBox.classList.add('prep');
+    currentPhase = 'prep';
+}
+
+
+// Event Listeners
 window.addEventListener('keydown', event => {
     switch (event.keyCode) {
     case 32:
@@ -29,10 +65,25 @@ window.addEventListener('keydown', event => {
     }
 });
 
+timeCircle.addEventListener('animationend', event => {
+    console.log('animationend');
+    const seconds = event.elapsedTime;
+    // timeCircle.classList.remove(`animate-${seconds}`);
+});
+
+timeCircle.addEventListener('animationstart', event => {
+    console.log('animationstart');
+    Array.from(event.target.classList).forEach(className => {
+        console.log(className);
+    });
+});
+
+
+// Init
 const timerConfig = {
-    prepTime: 10,
-    workTime: 20,
-    restTime: 10,
+    prepTime: 2,
+    workTime: 4,
+    restTime: 2,
     rounds: 8
 };
 
@@ -41,7 +92,7 @@ createProgressBar();
 let runningValues = Object.assign({}, timerConfig);
 
 timeDisplay.textContent = timerConfig.prepTime;
-roundsElement.textContent = `${runningValues.rounds}/${timerConfig.rounds}`;
+roundsCounter.textContent = `${runningValues.rounds}/${timerConfig.rounds}`;
 
 let intervalId = 0;
 let timerIsRunning = false;
@@ -70,7 +121,8 @@ Array.from(document.querySelectorAll('input')).forEach(input => {
     }
 });
 
-// FUNCTIONS
+
+// Functions
 function handleInputUpdate() {
     switch (this.id) {
     case 'prep':
@@ -95,7 +147,9 @@ function handleInputUpdate() {
 
 function timer() {
     if (runningValues[`${currentPhase}Time`] === 0) {
-        timeCircle.classList.remove(currentPhase);
+        timeBox.classList.remove(currentPhase);
+        const seconds = timerConfig[`${currentPhase}Time`];
+        timeCircle.classList.remove(`animate-${seconds}`);
         runningValues[`${currentPhase}Time`] = timerConfig[`${currentPhase}Time`];
 
         switch (currentPhase) {
@@ -108,7 +162,7 @@ function timer() {
         case 'rest':
             currentPhase = 'work';
             runningValues.rounds -= 1;
-            roundsElement.textContent = `${runningValues.rounds}/${timerConfig.rounds}`;
+            roundsCounter.textContent = `${runningValues.rounds}/${timerConfig.rounds}`;
 
             if (runningValues.rounds === 0) {
                 clearInterval(intervalId);
@@ -121,37 +175,14 @@ function timer() {
         }
     }
 
+    if (runningValues[`${currentPhase}Time`] === timerConfig[`${currentPhase}Time`]) {
+        const seconds = timerConfig[`${currentPhase}Time`];
+        timeCircle.classList.add(`animate-${seconds}`);
+    }
 
     timeDisplay.textContent = runningValues[`${currentPhase}Time`];
     runningValues[`${currentPhase}Time`] -= 1;
-    timeCircle.classList.add(currentPhase);
-}
-
-function startTimer() {
-    if (!timerIsRunning) {
-        intervalId = setInterval(timer, 1000);
-        timerIsRunning = true;
-        startButton.classList.add('hide');
-        pauseButton.classList.remove('hide');
-    }
-}
-
-function pauseTimer() {
-    timerIsRunning = false;
-    clearInterval(intervalId);
-    pauseButton.classList.add('hide');
-    startButton.classList.remove('hide');
-}
-
-function resetTimer() {
-    pauseTimer();
-    timeDisplay.textContent = timerConfig.prepTime;
-    runningValues = Object.assign({}, timerConfig);
-    roundsElement.textContent = `${runningValues.rounds}/${timerConfig.rounds}`;
-    timeCircle.classList.remove('work');
-    timeCircle.classList.remove('rest');
-    timeCircle.classList.add('prep');
-    currentPhase = 'prep';
+    timeBox.classList.add(currentPhase);
 }
 
 function createProgressBar() {

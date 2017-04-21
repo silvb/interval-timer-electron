@@ -2,18 +2,51 @@
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
+// Grab Displays
+var timeBox = document.querySelector('.time-box');
+var timeCircle = document.querySelector('circle.progress');
 var timeDisplay = document.querySelector('.center-time');
-var roundsElement = document.querySelector('.rounds');
+var roundsCounter = document.querySelector('.rounds');
+var progressBar = document.querySelector('.progress-bar');
+
+// Grab Controls
 var startButton = document.querySelector('button#start');
 var pauseButton = document.querySelector('button#pause');
 var resetButton = document.querySelector('button#reset');
-var progressBar = document.querySelector('.progress-bar');
-var timeCircle = document.querySelector('.time-circle');
 
 startButton.onclick = startTimer;
 pauseButton.onclick = pauseTimer;
 resetButton.onclick = resetTimer;
 
+// Timer actions
+function startTimer() {
+    if (!timerIsRunning) {
+        intervalId = setInterval(timer, 1000);
+        timerIsRunning = true;
+        startButton.classList.add('hide');
+        pauseButton.classList.remove('hide');
+    }
+}
+
+function pauseTimer() {
+    timerIsRunning = false;
+    clearInterval(intervalId);
+    pauseButton.classList.add('hide');
+    startButton.classList.remove('hide');
+}
+
+function resetTimer() {
+    pauseTimer();
+    timeDisplay.textContent = timerConfig.prepTime;
+    runningValues = Object.assign({}, timerConfig);
+    roundsCounter.textContent = runningValues.rounds + '/' + timerConfig.rounds;
+    timeBox.classList.remove('work');
+    timeBox.classList.remove('rest');
+    timeBox.classList.add('prep');
+    currentPhase = 'prep';
+}
+
+// Event Listeners
 window.addEventListener('keydown', function (event) {
     switch (event.keyCode) {
         case 32:
@@ -33,10 +66,24 @@ window.addEventListener('keydown', function (event) {
     }
 });
 
+timeCircle.addEventListener('animationend', function (event) {
+    console.log('animationend');
+    var seconds = event.elapsedTime;
+    // timeCircle.classList.remove(`animate-${seconds}`);
+});
+
+timeCircle.addEventListener('animationstart', function (event) {
+    console.log('animationstart');
+    Array.from(event.target.classList).forEach(function (className) {
+        console.log(className);
+    });
+});
+
+// Init
 var timerConfig = {
-    prepTime: 10,
-    workTime: 20,
-    restTime: 10,
+    prepTime: 2,
+    workTime: 4,
+    restTime: 2,
     rounds: 8
 };
 
@@ -45,7 +92,7 @@ createProgressBar();
 var runningValues = Object.assign({}, timerConfig);
 
 timeDisplay.textContent = timerConfig.prepTime;
-roundsElement.textContent = runningValues.rounds + '/' + timerConfig.rounds;
+roundsCounter.textContent = runningValues.rounds + '/' + timerConfig.rounds;
 
 var intervalId = 0;
 var timerIsRunning = false;
@@ -74,7 +121,7 @@ Array.from(document.querySelectorAll('input')).forEach(function (input) {
     }
 });
 
-// FUNCTIONS
+// Functions
 function handleInputUpdate() {
     switch (this.id) {
         case 'prep':
@@ -99,7 +146,9 @@ function handleInputUpdate() {
 
 function timer() {
     if (runningValues[currentPhase + 'Time'] === 0) {
-        timeCircle.classList.remove(currentPhase);
+        timeBox.classList.remove(currentPhase);
+        var seconds = timerConfig[currentPhase + 'Time'];
+        timeCircle.classList.remove('animate-' + seconds);
         runningValues[currentPhase + 'Time'] = timerConfig[currentPhase + 'Time'];
 
         switch (currentPhase) {
@@ -112,7 +161,7 @@ function timer() {
             case 'rest':
                 currentPhase = 'work';
                 runningValues.rounds -= 1;
-                roundsElement.textContent = runningValues.rounds + '/' + timerConfig.rounds;
+                roundsCounter.textContent = runningValues.rounds + '/' + timerConfig.rounds;
 
                 if (runningValues.rounds === 0) {
                     clearInterval(intervalId);
@@ -125,36 +174,14 @@ function timer() {
         }
     }
 
+    if (runningValues[currentPhase + 'Time'] === timerConfig[currentPhase + 'Time']) {
+        var _seconds = timerConfig[currentPhase + 'Time'];
+        timeCircle.classList.add('animate-' + _seconds);
+    }
+
     timeDisplay.textContent = runningValues[currentPhase + 'Time'];
     runningValues[currentPhase + 'Time'] -= 1;
-    timeCircle.classList.add(currentPhase);
-}
-
-function startTimer() {
-    if (!timerIsRunning) {
-        intervalId = setInterval(timer, 1000);
-        timerIsRunning = true;
-        startButton.classList.add('hide');
-        pauseButton.classList.remove('hide');
-    }
-}
-
-function pauseTimer() {
-    timerIsRunning = false;
-    clearInterval(intervalId);
-    pauseButton.classList.add('hide');
-    startButton.classList.remove('hide');
-}
-
-function resetTimer() {
-    pauseTimer();
-    timeDisplay.textContent = timerConfig.prepTime;
-    runningValues = Object.assign({}, timerConfig);
-    roundsElement.textContent = runningValues.rounds + '/' + timerConfig.rounds;
-    timeCircle.classList.remove('work');
-    timeCircle.classList.remove('rest');
-    timeCircle.classList.add('prep');
-    currentPhase = 'prep';
+    timeBox.classList.add(currentPhase);
 }
 
 function createProgressBar() {

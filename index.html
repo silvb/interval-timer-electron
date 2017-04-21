@@ -2,31 +2,33 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Untitled</title>
+    <title>Interval Timer</title>
     <link rel="stylesheet" href="build/style.css" />
 </head>
 <body>
     <div class="progress-bar">
         
     </div>
-    <div class="time-container">
-        <div class="time-circle">
-            <div class="center-time">
-            </div>
+    <div class="time-box">
+        <svg id="time-circle">
+            <circle cx="8rem" cy="8rem" r="7.75rem"></circle>
+            <circle class="progress" cx="8rem" cy="8rem" r="7.75rem"></circle>
+        </svg>
+        <div class="center-time">
         </div>
     </div>
-    <div class="rounds-container">
+    <div class="rounds-box">
         <div class="rounds">
         </div>
     </div>
 
-    <div class="button-container">
+    <div class="button-box">
         <button id="start" class="start">Start</button>
         <button id="pause" class="pause hide">Pause</button>
         <button id="reset">Reset</button>
     </div>
 
-    <div class="config-container">
+    <div class="config-box">
         <div class="config-row">
             <label for="prep">Prep</label>
             <input type="text" id="prep" />

@@ -1,3 +1,7 @@
+// Variables
+@pi: 3.14159265359;
+@radius: 7.75rem;
+
 html {
     font-size: 24px;
     font-family: 'Arial';
@@ -14,7 +18,7 @@ body {
     display: flex;
 
     .phase {
-        height: 4px;
+        height: 8px;
         flex-grow: 1;
 
         &.prep {
@@ -31,76 +35,101 @@ body {
     }
 }
 
-.time-container {
+.time-box {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
-    height: 40vh;
-    padding: 5% 0;
+    height: 16rem;
+    margin: 5vh 0;
 
-    .time-circle {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 6px solid white;
-        height: 16rem;
-        width: 16rem;
-        border-radius: 50%;
-        transition: 0.2s border-color ease;
-
-        .center-time {
-            font-size: 10rem;
-            font-weight: bold;
-            color: white;
-            transition: 0.2s color ease;
-        }
-
-        &.prep {
-            .center-time {
-                color: gold;
-            }
-
-            border-color: gold;
-        }
-
-        &.work {
-            .center-time {
-                color: springgreen;
-            }
-
-            border-color: springgreen;
-        }
-
-        &.rest {
-            .center-time {
-                color: orangered;
-            }
-
-            border-color: orangered;
-        }
-
-
+    .center-time {
+        font-size: 10rem;
+        color: white;
+        transition: 0.2s color ease;
     }
-    
+
+    svg {
+        transform: rotate(-90deg);
+        width: 16rem;
+        height: 16rem;
+        position: absolute;
+
+        circle {
+            fill: none;
+            stroke: #3d3d3d;
+            stroke-width: 2px;
+
+            &.progress {
+                stroke-width: 0.5rem;
+                stroke-linecap: round;
+                stroke-dasharray: calc(2 * @pi * @radius);
+                stroke-dashoffset: calc(2 * @pi * @radius);
+            }
+
+            .generateAnimations(60);
+            
+            @keyframes dash {
+                from {
+                    stroke-dashoffset: calc(2 * @pi * @radius);
+                }
+
+                to {
+                    stroke-dashoffset: 0;
+                }
+            }
+        }
+    }
+
+
+    &.prep {
+        .center-time {
+            color: gold;
+        }
+
+        svg circle.progress {
+            stroke: gold;
+        }
+    }
+
+    &.work {
+        .center-time {
+            color: springgreen;
+        }
+
+        svg circle.progress {
+            stroke: springgreen;
+        }
+    }
+
+    &.rest {
+        .center-time {
+            color: orangered;
+        }
+
+        svg circle.progress {
+            stroke: orangered;
+        }
+    }
+
 }
 
-.rounds-container {
+.rounds-box {
     display: flex;
-    align-items: center;
     justify-content: center;
     width: 100%;
-    height: 10vh;
-    padding: 5% 0;
+    margin: 0 0 5vh 0;
 
     .rounds {
         font-size: 6rem;
+        line-height: 6rem;
     }
 }
 
-.button-container {
+.button-box {
     display: flex;
     justify-content: center;
+    margin: 0 0 5vh 0;
 }
 
 button {
@@ -112,7 +141,6 @@ button {
     cursor: pointer;
     border-radius: 3px;
     padding: 8px 16px;
-    box-shadow: inset -1px -1px 4px 0px rgba(255, 255, 255, 0.3);
     min-width: 10rem;
     margin: 0 5px;
 
@@ -159,7 +187,7 @@ input {
     border-bottom: 1px solid #e4e4e4;
 }
 
-.config-container {
+.config-box {
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -175,4 +203,15 @@ input {
             flex: 0 0 50%;
         }
     }
+}
+
+.generateAnimations(@counter) when (@counter > 0) {
+
+    &.animate-@{counter} {
+        animation: dash ~"@{counter}s" linear forwards;
+        stroke-dasharray: calc(2 * @pi * @radius);
+        stroke-dashoffset: calc(2 * @pi * @radius); 
+    }
+
+    .generateAnimations((@counter - 1));
 }
